@@ -105,6 +105,7 @@ PROTSEDURA:
 MASSAJ:
 - Umumiy massaj: 80,000 | Katta massaj: 200,000"""
 
+CHEGIRMALAR YO'Q: Agar mijoz chegirma so'rasa, "Hozircha chegirmalarimiz yo'q" de.
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
