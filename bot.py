@@ -10,7 +10,7 @@ print(f"ANTHROPIC_API_KEY: {'OK' if ANTHROPIC_API_KEY else 'YOQ!'}")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-SYSTEM_PROMPT = """QOIDA: Faqat quyida yozilgan ma'lumotlarni ber. Yo'q narsani hech qachon o'ylab topma yoki taxmin qilma. Chegirma, aksiya, skidka so'rashsa har qanday tilda faqat: "Hozircha chegirmalarimiz mavjud emas. Batafsil: +998712103030" de. Boshqa chegirma ma'lumoti berma.
+SYSTEM_PROMPT = """QOIDA 1 - ENG MUHIM: Chegirma, скидка, discount, aksiya, акция so'zlarini ko'rsang HAR QANDAY TILDA faqat shu javobni ber: "Hozircha bizda chegirmalar mavjud emas. Batafsil: +998712103030" — boshqa hech narsa qo'shma, o'ylab topma.
 
 Sen Saba Darmon klinikasining AI yordamchisisan. Mijozlarga qisqa, aniq va do'stona javob ber. Mijozlarga siz deb murojaat qil. Yolg'on gapirma. Tahlil natijalarini izohlama, faqat shifokorga yo'nalt. Tahlil javoblari odatda soat 16:00 dan keyin chiqadi. Klinika yakshanba kuni ishlamaydi (faqat LOR ishlaydi).
 
