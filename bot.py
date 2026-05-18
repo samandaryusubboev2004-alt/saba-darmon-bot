@@ -1,6 +1,8 @@
 import os
+import json
 import anthropic
-from telegram.ext import Updater, MessageHandler, Filters
+import urllib.request
+import urllib.parse
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -8,9 +10,9 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 print(f"TELEGRAM_TOKEN: {'OK' if TELEGRAM_TOKEN else 'YOQ!'}")
 print(f"ANTHROPIC_API_KEY: {'OK' if ANTHROPIC_API_KEY else 'YOQ!'}")
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-SYSTEM_PROMPT = """QOIDA 1 - ENG MUHIM: Chegirma, скидка, скидки, скидке, скдка,  discount, aksiya, акция so'zlarini ko'rsang HAR QANDAY TILDA faqat shu javobni ber: "Hozircha bizda chegirmalar mavjud emas. Batafsil: +998712103030" — boshqa hech narsa qo'shma, o'ylab topma.
+SYSTEM_PROMPT = """QOIDA 1 - ENG MUHIM: Chegirma, скидка, скидки, discount, aksiya, акция so'zlarini ko'rsang HAR QANDAY TILDA faqat shu javobni ber: "Hozircha bizda chegirmalar mavjud emas. Batafsil: +998712103030" — boshqa hech narsa qo'shma, o'ylab topma.
 
 Sen Saba Darmon klinikasining AI yordamchisisan. Mijozlarga qisqa, aniq va do'stona javob ber. Mijozlarga siz deb murojaat qil. Yolg'on gapirma. Tahlil natijalarini izohlama, faqat shifokorga yo'nalt. Tahlil javoblari odatda soat 16:00 dan keyin chiqadi. Klinika yakshanba kuni ishlamaydi (faqat LOR ishlaydi).
 
@@ -103,31 +105,62 @@ MASSAJ:
 - Umumiy: 80,000 | Katta: 200,000"""
 
 
-def handle_message(update, context):
-    user_message = update.message.text
-    if not user_message:
-        return
+def telegram_request(method, data):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}"
+    body = json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
+
+
+def get_updates(offset=None):
+    params = {"timeout": 30, "allowed_updates": ["message"]}
+    if offset:
+        params["offset"] = offset
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+    body = json.dumps(params).encode("utf-8")
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
     try:
-        response = client.messages.create(
+        with urllib.request.urlopen(req, timeout=35) as resp:
+            return json.loads(resp.read())
+    except Exception as e:
+        print(f"getUpdates xato: {e}")
+        return {"ok": False, "result": []}
+
+
+def send_message(chat_id, text):
+    telegram_request("sendMessage", {"chat_id": chat_id, "text": text})
+
+
+def get_ai_reply(text):
+    try:
+        response = claude.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=1000,
             system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}]
+            messages=[{"role": "user", "content": text}]
         )
-        reply = response.content[0].text
-        update.message.reply_text(reply)
+        return response.content[0].text
     except Exception as e:
-        print(f"XATO: {type(e).__name__}: {e}")
-        update.message.reply_text("Uzr, xatolik yuz berdi. Qayta urinib ko'ring.")
+        print(f"Claude xato: {e}")
+        return "Uzr, xatolik yuz berdi. Qayta urinib ko'ring."
 
 
 def main():
-    updater = Updater(TELEGRAM_TOKEN)
-    dp = updater.dispatcher
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
     print("Bot ishga tushdi!")
-    updater.start_polling()
-    updater.idle()
+    offset = None
+    while True:
+        result = get_updates(offset)
+        if not result.get("ok"):
+            continue
+        for update in result.get("result", []):
+            offset = update["update_id"] + 1
+            message = update.get("message", {})
+            text = message.get("text", "")
+            chat_id = message.get("chat", {}).get("id")
+            if text and chat_id and not text.startswith("/"):
+                reply = get_ai_reply(text)
+                send_message(chat_id, reply)
 
 
 if __name__ == "__main__":
