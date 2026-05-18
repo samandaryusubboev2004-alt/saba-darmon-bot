@@ -1,0 +1,53 @@
+- Prostata (rektal): 130,000
+- Jigar va ot pufagi: 120,000
+- Bachadon (transvaginal): 130,000
+- Qorin boshlighi: 220,000
+- Qalqonsimon bez: 120,000
+- Kokrak bezi: 180,000
+- Yurak (EXO): 180,000
+- Homiladorlik (12 haftaga qadar): 100,000
+- Homiladorlik (13-40 hafta): 140,000
+- Follikulometriya: 60,000
+- Doppler pastki oyoqlar: 120,000
+
+RENTGENOGRAFIYA: 130,000-170,000
+MSKT (KT skaneri): 320,000-420,000 (asosan 350,000)
+EKG: 50,000 | Xolter: 200,000
+EEG: 120,000 | Video-EEG 2 soat: 400,000
+EGDS (gastroskopiya): 350,000-780,000
+Kolonoskopiya: 450,000-880,000
+Kolposkopiya: 190,000
+
+FIZIOTERAPIYA:
+- Elektroforez: 45,000 | Magnit: 80,000 | UVT: 50,000
+- Ozonoterapiya: 60,000 | VLOK: 50,000
+
+PROTSEDURA:
+- Mushak ichiga: 20,000 | Vena ichiga (200ml): 50,000 | Vena ichiga (400ml): 95,000
+
+MASSAJ:
+- Umumiy massaj: 80,000 | Katta massaj: 200,000"""
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_message = update.message.text
+    if not user_message:
+        return
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1000,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_message}]
+        )
+        reply = response.content[0].text
+        await update.message.reply_text(reply)
+    except Exception as e:
+        await update.message.reply_text("Uzr, xatolik yuz berdi. Qayta urinib koring.")
+
+
+if name == "__main__":
+    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    print("Bot ishga tushdi!")
+    app.run_polling()
