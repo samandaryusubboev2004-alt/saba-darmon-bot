@@ -6,6 +6,9 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
+print(f"TELEGRAM_TOKEN: {'OK' if TELEGRAM_TOKEN else 'YOQ!'}")
+print(f"ANTHROPIC_API_KEY: {'OK' if ANTHROPIC_API_KEY else 'YOQ!'}")
+
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 SYSTEM_PROMPT = """Sen — Saba Darmon klinikasining AI yordamchisisan. Mijozlarga qisqa, aniq va do'stona javob ber. Mijozlarga "siz" deb murojaat qil. Yolg'on gapirma. Tahlil natijalarini izohlama, faqat shifokorga yo'nalt. Tahlil javoblari odatda soat 16:00 dan keyin chiqadi. Klinika yakshanba kuni ishlamaydi (faqat LOR ishlaydi).
@@ -117,6 +120,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply = response.content[0].text
         await update.message.reply_text(reply)
     except Exception as e:
+        print(f"XATO: {type(e).__name__}: {e}")
         await update.message.reply_text("Uzr, xatolik yuz berdi. Qayta urinib ko'ring.")
 
 
