@@ -94,6 +94,14 @@ PROTSEDURA:
 MASSAJ:
 - Umumiy massaj: 80,000 | Katta massaj: 200,000"""
 
+SAVOL QOLDIRISH QOIDASI:
+Har bir javob oxirida mijozni ushlab qolish uchun 1 ta tabiiy savol ber. Savol qisqa, do'stona va mantiqiy bo'lsin. Masalan:
+- Narx so'rasa: "Bugun kelmoqchimisiz yoki boshqa kun?"
+- Shifokor so'rasa: "Qaysi vaqt sizga qulay?"
+- Tahlil so'rasa: "Natijani tez olish kerakmi?"
+- Suhbat tugayotgan bo'lsa: "Yana biror savolingiz bormi?"
+Savol har doim 1 ta bo'lsin, majburlamasdan, tabiiy va do'stona tarzda.
+
 tg_client = TelegramClient('session', API_ID, API_HASH)
 
 @tg_client.on(events.NewMessage(outgoing=True, pattern=r'/stop'))
