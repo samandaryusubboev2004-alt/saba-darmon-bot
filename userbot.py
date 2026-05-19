@@ -1,18 +1,20 @@
 import os
 import anthropic
 from telethon import TelegramClient, events
+from collections import defaultdict
 
 API_ID = int(os.environ.get("API_ID"))
 API_HASH = os.environ.get("API_HASH")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 STOP_LIST = set()
+chat_history = defaultdict(list)
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 SYSTEM_PROMPT = """QOIDA 1 - ENG MUHIM: Chegirma, скидка, скидки, discount, aksiya, акция soʻzlarini koʻrsang HAR QANDAY TILDA faqat shu javobni ber: Hozircha bizda chegirmalar mavjud emas. Batafsil: +998712103030 — boshqa hech narsa qoʻshma, oʻylab topma.
 
-Sen — Saba Darmon klinikasining AI yordamchisisan. Mijozlarga qisqa, aniq va doʻstona javob ber. Mijozlarga siz deb murojaat qil. Yolʻgʻon gapirma. Tahlil natijalarini izohlama, faqat shifokorga yoʻnalt. Tahlil javoblari odatda soat 16:00 dan keyin chiqadi. Klinika yakshanba kuni ishlamaydi (faqat LOR ishlaydi).
+Sen — Saba Darmon klinikasining AI yordamchisisan. Mijozlarga qisqa, aniq va doʻstona javob ber. Mijozlarga siz deb murojaat qil. Yolgʻon gapirma. Tahlil natijalarini izohlama, faqat shifokorga yoʻnalt. Tahlil javoblari odatda soat 16:00 dan keyin chiqadi. Klinika yakshanba kuni ishlamaydi (faqat LOR ishlaydi).
 
 Telefon: +998712103030
 Manzil: Toshkent, Shayxontohur tumani, Nurafshon kochasi 7A/3
@@ -111,7 +113,7 @@ async def stop_handler(event):
         user_id = replied.sender_id
         STOP_LIST.add(user_id)
         await event.delete()
-        await tg_client.send_message(event.chat_id, "Bot to'xtatildi!")
+        await tg_client.send_message(event.chat_id, "Bot toxtatildi!")
 
 @tg_client.on(events.NewMessage(outgoing=True, pattern=r'/start'))
 async def start_handler(event):
@@ -127,14 +129,28 @@ async def handler(event):
     sender_id = event.sender_id
     if sender_id in STOP_LIST:
         return
+
+    user_text = event.text
+    if not user_text:
+        return
+
+    history = chat_history[sender_id]
+    history.append({"role": "user", "content": user_text})
+
+    if len(history) > 20:
+        history = history[-20:]
+        chat_history[sender_id] = history
+
     try:
         response = client.messages.create(
             model="claude-sonnet-4-6",
             max_tokens=1000,
             system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": event.text}]
+            messages=history
         )
-        await event.reply(response.content[0].text)
+        reply = response.content[0].text
+        history.append({"role": "assistant", "content": reply})
+        await event.reply(reply)
     except Exception as e:
         print(f"XATO: {e}")
 
