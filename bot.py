@@ -7,6 +7,7 @@ from collections import defaultdict
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+CRM_CHANNEL_ID = -1003999990660
 
 claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -38,23 +39,21 @@ SYSTEM_PROMPT = """Sen Saba Darmon klinikasining professional AI yordamchisisan.
 QOIDALAR:
 - Mijozga HAR DOIM "siz" deb murojaat qil, hech qachon "sen" dema
 - Faqat togri imlo bilan yoz, xato yozma
-- Birinchi xabarga faqat: "Salom! Saba Darmon klinikasiga xush kelibsiz. Sizga qanday yordam bera olaman?" de
-- Qisqa javob ber, keraksiz gap qoshma
-- Uylab topilgan sozlarni ishlatma
 - Qisqa va aniq yoz
 - Dostona gapir
-- Mijozga siz deb murojaat qil
-- Emoji ni kam ishlat
+- Emoji ni kam ishlatma
 - Markdown ishlatma
 - Doktorlarni taqqoslama
 - Eng yaxshi, eng arzon degan gaplarni ishlatma
 - Tahlil natijalarini izohlama, faqat shifokorga yonalt
 - Chegirma, skidka, aksiya haqida soʻrasa faqat: Hozircha bizda chegirmalar mavjud emas. Batafsil: +998712103030
 - Tahlil javoblari soat 16:00 dan keyin chiqadi
-- Klinika yakshanba kuni ishlamaydi, faqat LOR ishlaydi
-- Har javob oxirida bitta tabiiy savol ber
 - Yakshanba kuni faqat navbatchi LOR ishlaydi, aniq shifokor ismi aytilmaydi
-- Shifokor vaqtini aytganda oxirida har doim qo'sh: "Jadval o'zgarishi mumkin, aniq vaqt uchun call-markaz bilan bog'laning: +998712103030"
+- Shifokor vaqtini aytganda oxirida har doim qosh: Jadval ozgarishi mumkin, aniq vaqt uchun call-markaz bilan boganing: +998712103030
+- Birinchi xabarga faqat: Salom! Saba Darmon klinikasiga xush kelibsiz. Sizga qanday yordam bera olaman?
+- Qisqa javob ber, keraksiz gap qoshma
+- Uylab topilgan sozlarni ishlatma
+- Har javob oxirida bitta tabiiy savol ber
 
 Telefon: +998712103030
 Manzil: Toshkent, Shayxontohur tumani, Nurafshon kochasi 7A/3
@@ -69,10 +68,11 @@ SHIFOKORLAR:
 - Endokrinolog: Azizova Nodira | PN-SB 09:00-15:00 | Birlamchi: 300,000 | Takroriy: 150,000
 - Ginekolog: Isanbaeva Landish | PN-SB 14:00-17:00 yozilish tel 508786015 | Birlamchi: 450,000
 - Ginekolog: Azizova Zulxumor | yozilish tel 998739703 | Birlamchi: 500,000 | Takroriy: 150,000 | VIP: 1,200,000
-- Ginekolog: Tursunova Nazokat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
+- Ginekolog: Tyan Tatyana | Juma 12:00-14:00 yozilish tel 909957733 | Birlamchi: 300,000
+- Ginekolog: Tursinova Nazoqat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
 - Ginekolog: Samadova Guzal | PN-JM 09:00-14:00 | Birlamchi: 150,000 | Takroriy: 75,000
 - Pediatr: Kamilova Durdonaxon | PN-SB 09:00-12:00 | Birlamchi: 150,000 | Takroriy: 75,000
-- LOR: Omonjonov Husniddin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
+- LOR: Omonjonov Husnidin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
 - LOR: Alimjonova Komila | Seshanba Payshanba Shanba 9:00-14:00 | Birlamchi: 150,000 | Takroriy: 50,000
 - Bolalar nevologi: Ganieva Lobar | PN-SB 9:30-13:00 | Birlamchi: 200,000
 - Nevrolog: Agzamova Gulmira | PN-SB 09:00-14:00 | Birlamchi: 200,000 | Takroriy: 100,000
@@ -163,6 +163,29 @@ def telegram_request(method, data):
 
 def send_message(chat_id, text):
     telegram_request("sendMessage", {"chat_id": chat_id, "text": text})
+
+# =========================
+# CRM
+# =========================
+
+def send_to_crm(user_id, username, first_name, text, reply):
+    try:
+        name = first_name or "Noma'lum"
+        uname = f"@{username}" if username else "username yo'q"
+        crm_text = (
+            f"📩 Yangi xabar!\n"
+            f"👤 Ism: {name}\n"
+            f"🔗 Username: {uname}\n"
+            f"🆔 ID: {user_id}\n"
+            f"💬 Savol: {text}\n"
+            f"🤖 Javob: {reply[:200]}..."
+        )
+        telegram_request("sendMessage", {
+            "chat_id": CRM_CHANNEL_ID,
+            "text": crm_text
+        })
+    except Exception as e:
+        print(f"CRM xato: {e}")
 
 # =========================
 # GET UPDATES
@@ -260,6 +283,9 @@ def main():
             message = update.get("message", {})
             text = message.get("text", "")
             chat_id = message.get("chat", {}).get("id")
+            user_id = message.get("from", {}).get("id")
+            username = message.get("from", {}).get("username")
+            first_name = message.get("from", {}).get("first_name")
 
             if not text or not chat_id:
                 continue
@@ -271,6 +297,7 @@ def main():
 
             reply = get_ai_reply(chat_id, text)
             send_message(chat_id, reply)
+            send_to_crm(user_id, username, first_name, text, reply)
 
 if __name__ == "__main__":
     main()
