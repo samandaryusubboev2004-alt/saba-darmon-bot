@@ -9,6 +9,10 @@ from datetime import datetime
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 CRM_CHANNEL_ID = -1003999990660
+ADMIN_IDS = [
+    1810849960,   # admin 1
+    6592939925,   # admin 2
+]
 
 claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -396,7 +400,7 @@ def main():
             if not text or not chat_id:
                 continue
 
-            # /start va boshqa komandalar — YANGI
+            # /start va boshqa komandalar
             if text.startswith("/"):
                 if text == "/start":
                     send_typing(chat_id)
@@ -406,6 +410,20 @@ def main():
                         "so'ragan savolingizga javob beramiz.\n\n"
                         "Sizga qanday yordam bera olaman?"
                     )
+                elif text == "/stats" and user_id in ADMIN_IDS:
+                    send_typing(chat_id)
+                    top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
+                    top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
+                    topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)]) or "  Ma'lumot yo'q"
+                    hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours]) or "  Ma'lumot yo'q"
+                    stats = (
+                        f"📊 Bugungi statistika\n\n"
+                        f"👥 Foydalanuvchilar: {len(analytics['unique_users'])} ta\n"
+                        f"💬 Jami xabarlar: {analytics['total_messages']} ta\n\n"
+                        f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
+                        f"⏰ Eng faol vaqt:\n{hours_text}"
+                    )
+                    send_message(chat_id, stats)
                 continue
 
             if not check_rate_limit(chat_id):
