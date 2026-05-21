@@ -10,8 +10,8 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 CRM_CHANNEL_ID = -1003999990660
 ADMIN_IDS = [
-    1810849960,   # admin 1
-    6592939925,   # admin 2
+    1810849960,  # admin 1
+    6592939925,  # admin 2
 ]
 
 claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -63,7 +63,7 @@ def update_analytics(user_id, text):
     analytics["topics"][topic] += 1
 
 # =========================
-# DAILY REPORT — BUG TUZATILDI
+# DAILY REPORT
 # =========================
 
 report_sent_today = False
@@ -247,10 +247,13 @@ def telegram_request(method, data):
 # =========================
 
 def send_message(chat_id, text):
+    # Telegram 4096 belgi limitini handle qilish
+    if len(text) > 4096:
+        text = text[:4090] + "..."
     telegram_request("sendMessage", {"chat_id": chat_id, "text": text})
 
 # =========================
-# TYPING INDIKATOR — YANGI
+# TYPING INDIKATOR
 # =========================
 
 def send_typing(chat_id):
@@ -376,68 +379,72 @@ def main():
     offset = None
 
     while True:
-        now = datetime.now()
+        try:
+            now = datetime.now()
 
-        # Daily report — faqat bir marta soat 20:00 da
-        if now.hour == 20 and not report_sent_today:
-            send_daily_report()
-        if now.hour == 21:
-            report_sent_today = False  # Ertangi kun uchun reset
+            # Daily report — faqat bir marta soat 20:00 da
+            if now.hour == 20 and not report_sent_today:
+                send_daily_report()
+            if now.hour == 21:
+                report_sent_today = False  # Ertangi kun uchun reset
 
-        result = get_updates(offset)
-        if not result.get("ok"):
-            continue
-
-        for update in result.get("result", []):
-            offset = update["update_id"] + 1
-            message = update.get("message", {})
-            text = message.get("text", "")
-            chat_id = message.get("chat", {}).get("id")
-            user_id = message.get("from", {}).get("id")
-            username = message.get("from", {}).get("username")
-            first_name = message.get("from", {}).get("first_name")
-
-            if not text or not chat_id:
+            result = get_updates(offset)
+            if not result.get("ok"):
                 continue
 
-            # /start va boshqa komandalar
-            if text.startswith("/"):
-                if text == "/start":
-                    send_typing(chat_id)
-                    send_message(chat_id,
-                        "Salom! 👋 Saba Darmon klinikasiga xush kelibsiz.\n\n"
-                        "Shifokorlar, tahlillar, narxlar yoki manzil haqida "
-                        "so'ragan savolingizga javob beramiz.\n\n"
-                        "Sizga qanday yordam bera olaman?"
-                    )
-                elif text == "/stats" and user_id in ADMIN_IDS:
-                    send_typing(chat_id)
-                    top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
-                    top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
-                    topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)]) or "  Ma'lumot yo'q"
-                    hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours]) or "  Ma'lumot yo'q"
-                    stats = (
-                        f"📊 Bugungi statistika\n\n"
-                        f"👥 Foydalanuvchilar: {len(analytics['unique_users'])} ta\n"
-                        f"💬 Jami xabarlar: {analytics['total_messages']} ta\n\n"
-                        f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
-                        f"⏰ Eng faol vaqt:\n{hours_text}"
-                    )
-                    send_message(chat_id, stats)
-                continue
+            for update in result.get("result", []):
+                offset = update["update_id"] + 1
+                message = update.get("message", {})
+                text = message.get("text", "")
+                chat_id = message.get("chat", {}).get("id")
+                user_id = message.get("from", {}).get("id")
+                username = message.get("from", {}).get("username")
+                first_name = message.get("from", {}).get("first_name")
 
-            if not check_rate_limit(chat_id):
-                send_message(chat_id, "Juda tez yozmoqdasiz, biroz kuting.")
-                continue
+                if not text or not chat_id:
+                    continue
 
-            update_analytics(user_id, text)
+                # /start va boshqa komandalar
+                if text.startswith("/"):
+                    if text == "/start":
+                        send_typing(chat_id)
+                        send_message(chat_id,
+                            "Salom! 👋 Saba Darmon klinikasiga xush kelibsiz.\n\n"
+                            "Shifokorlar, tahlillar, narxlar yoki manzil haqida "
+                            "so'ragan savolingizga javob beramiz.\n\n"
+                            "Sizga qanday yordam bera olaman?"
+                        )
+                    elif text == "/stats" and user_id in ADMIN_IDS:
+                        send_typing(chat_id)
+                        top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
+                        top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
+                        topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)]) or "  Ma'lumot yo'q"
+                        hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours]) or "  Ma'lumot yo'q"
+                        stats = (
+                            f"📊 Bugungi statistika\n\n"
+                            f"👥 Foydalanuvchilar: {len(analytics['unique_users'])} ta\n"
+                            f"💬 Jami xabarlar: {analytics['total_messages']} ta\n\n"
+                            f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
+                            f"⏰ Eng faol vaqt:\n{hours_text}"
+                        )
+                        send_message(chat_id, stats)
+                    continue
 
-            # Typing indikator — javobdan OLDIN
-            send_typing(chat_id)
+                if not check_rate_limit(chat_id):
+                    send_message(chat_id, "Juda tez yozmoqdasiz, biroz kuting.")
+                    continue
 
-            reply = get_ai_reply(chat_id, text)
-            send_message(chat_id, reply)
-            send_to_crm(user_id, username, first_name, text, reply)
+                update_analytics(user_id, text)
+                send_typing(chat_id)
+                reply = get_ai_reply(chat_id, text)
+                send_message(chat_id, reply)
+                send_to_crm(user_id, username, first_name, text, reply)
+
+        except Exception as e:
+            print(f"⚠️ Xato: {e}")
+            print("5 soniya kutilmoqda...")
+            time.sleep(5)
+            print("Qayta urinilmoqda...")
 
 if __name__ == "__main__":
     main()
