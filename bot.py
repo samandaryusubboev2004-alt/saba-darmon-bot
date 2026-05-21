@@ -44,7 +44,7 @@ QOIDALAR:
 - Qisqa va aniq yoz
 - Dostona gapir
 - Mijozga siz deb murojaat qil
-- Emoji ni kam ishlatma
+- Emoji ni kam ishlat
 - Markdown ishlatma
 - Doktorlarni taqqoslama
 - Eng yaxshi, eng arzon degan gaplarni ishlatma
@@ -69,11 +69,10 @@ SHIFOKORLAR:
 - Endokrinolog: Azizova Nodira | PN-SB 09:00-15:00 | Birlamchi: 300,000 | Takroriy: 150,000
 - Ginekolog: Isanbaeva Landish | PN-SB 14:00-17:00 yozilish tel 508786015 | Birlamchi: 450,000
 - Ginekolog: Azizova Zulxumor | yozilish tel 998739703 | Birlamchi: 500,000 | Takroriy: 150,000 | VIP: 1,200,000
-- Ginekolog: Tyan Tatyana | Juma 12:00-14:00 yozilish tel 909957733 | Birlamchi: 300,000
-- Ginekolog: Tursinova Nazoqat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
+- Ginekolog: Tursunova Nazokat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
 - Ginekolog: Samadova Guzal | PN-JM 09:00-14:00 | Birlamchi: 150,000 | Takroriy: 75,000
 - Pediatr: Kamilova Durdonaxon | PN-SB 09:00-12:00 | Birlamchi: 150,000 | Takroriy: 75,000
-- LOR: Omonjonov Husnidin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
+- LOR: Omonjonov Husniddin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
 - LOR: Alimjonova Komila | Seshanba Payshanba Shanba 9:00-14:00 | Birlamchi: 150,000 | Takroriy: 50,000
 - Bolalar nevologi: Ganieva Lobar | PN-SB 9:30-13:00 | Birlamchi: 200,000
 - Nevrolog: Agzamova Gulmira | PN-SB 09:00-14:00 | Birlamchi: 200,000 | Takroriy: 100,000
