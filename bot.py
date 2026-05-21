@@ -4,6 +4,7 @@ import time
 import anthropic
 import urllib.request
 from collections import defaultdict
+from datetime import datetime
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -14,6 +15,81 @@ claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 chat_history = defaultdict(list)
 message_counter = defaultdict(int)
 last_request_time = defaultdict(float)
+
+# =========================
+# ANALYTICS
+# =========================
+
+analytics = {
+    "total_messages": 0,
+    "unique_users": set(),
+    "hourly": defaultdict(int),
+    "topics": defaultdict(int),
+    "last_report": datetime.now().date()
+}
+
+TOPIC_KEYWORDS = {
+    "Qon tahlili": ["qon", "blood", "кровь"],
+    "UZI": ["uzi", "узи", "ultrasound"],
+    "Shifokor": ["shifokor", "doktor", "врач", "doctor"],
+    "Narx": ["narx", "цена", "price", "qancha", "стоимость"],
+    "Manzil": ["manzil", "адрес", "address", "qayer"],
+    "Telefon": ["telefon", "телефон", "raqam"],
+    "Tahlil natija": ["natija", "результат", "javob"],
+    "LOR": ["lor", "лор", "quloq", "burun", "tomoq"],
+    "Ginekolog": ["ginekolog", "гинеколог"],
+    "Urolog": ["urolog", "уролог"],
+    "Kardiolog": ["kardiolog", "кардиолог", "yurak"],
+}
+
+def detect_topic(text):
+    text_lower = text.lower()
+    for topic, keywords in TOPIC_KEYWORDS.items():
+        for kw in keywords:
+            if kw in text_lower:
+                return topic
+    return "Boshqa"
+
+def update_analytics(user_id, text):
+    analytics["total_messages"] += 1
+    analytics["unique_users"].add(user_id)
+    hour = datetime.now().hour
+    analytics["hourly"][hour] += 1
+    topic = detect_topic(text)
+    analytics["topics"][topic] += 1
+
+def send_daily_report():
+    today = datetime.now().date()
+    if analytics["last_report"] == today:
+        return
+    analytics["last_report"] = today
+
+    top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
+    top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
+
+    topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)])
+    hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours])
+
+    report = (
+        f"📊 Kunlik hisobot — {today}\n\n"
+        f"👥 Yangi mijozlar: {len(analytics['unique_users'])} ta\n"
+        f"💬 Jami xabarlar: {analytics['total_messages']} ta\n\n"
+        f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
+        f"⏰ Eng faol vaqt:\n{hours_text}"
+    )
+
+    try:
+        telegram_request("sendMessage", {
+            "chat_id": CRM_CHANNEL_ID,
+            "text": report
+        })
+    except Exception as e:
+        print(f"Hisobot xato: {e}")
+
+    analytics["total_messages"] = 0
+    analytics["unique_users"] = set()
+    analytics["hourly"] = defaultdict(int)
+    analytics["topics"] = defaultdict(int)
 
 # =========================
 # FAQ SYSTEM
@@ -68,11 +144,10 @@ SHIFOKORLAR:
 - Endokrinolog: Azizova Nodira | PN-SB 09:00-15:00 | Birlamchi: 300,000 | Takroriy: 150,000
 - Ginekolog: Isanbaeva Landish | PN-SB 14:00-17:00 yozilish tel 508786015 | Birlamchi: 450,000
 - Ginekolog: Azizova Zulxumor | yozilish tel 998739703 | Birlamchi: 500,000 | Takroriy: 150,000 | VIP: 1,200,000
-- Ginekolog: Tyan Tatyana | Juma 12:00-14:00 yozilish tel 909957733 | Birlamchi: 300,000
-- Ginekolog: Tursinova Nazoqat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
+- Ginekolog: Tursunova Nazokat | yozilish hamshira Lobar 977060941 | Birlamchi: 300,000
 - Ginekolog: Samadova Guzal | PN-JM 09:00-14:00 | Birlamchi: 150,000 | Takroriy: 75,000
 - Pediatr: Kamilova Durdonaxon | PN-SB 09:00-12:00 | Birlamchi: 150,000 | Takroriy: 75,000
-- LOR: Omonjonov Husnidin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
+- LOR: Omonjonov Husniddin | PN-JM 09:00-18:00 | Birlamchi: 200,000 | Takroriy: 75,000
 - LOR: Alimjonova Komila | Seshanba Payshanba Shanba 9:00-14:00 | Birlamchi: 150,000 | Takroriy: 50,000
 - Bolalar nevologi: Ganieva Lobar | PN-SB 9:30-13:00 | Birlamchi: 200,000
 - Nevrolog: Agzamova Gulmira | PN-SB 09:00-14:00 | Birlamchi: 200,000 | Takroriy: 100,000
@@ -171,7 +246,7 @@ def send_message(chat_id, text):
 def send_to_crm(user_id, username, first_name, text, reply):
     try:
         name = first_name or "Noma'lum"
-        uname = f"@{username}" if username else "username yo'q"
+        uname = f"@{username}" if username else "username yoq"
         crm_text = (
             f"📩 Yangi xabar!\n"
             f"👤 Ism: {name}\n"
@@ -275,6 +350,10 @@ def main():
     print("Bot ishga tushdi!")
     offset = None
     while True:
+        now = datetime.now()
+        if now.hour == 20 and now.minute == 0:
+            send_daily_report()
+
         result = get_updates(offset)
         if not result.get("ok"):
             continue
@@ -295,6 +374,7 @@ def main():
                 send_message(chat_id, "Juda tez yozmoqdasiz, biroz kuting.")
                 continue
 
+            update_analytics(user_id, text)
             reply = get_ai_reply(chat_id, text)
             send_message(chat_id, reply)
             send_to_crm(user_id, username, first_name, text, reply)
