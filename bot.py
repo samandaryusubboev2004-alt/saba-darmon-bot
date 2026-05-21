@@ -136,7 +136,6 @@ QOIDALAR:
 - Tahlil javoblari soat 16:00 dan keyin chiqadi
 - Yakshanba kuni faqat navbatchi LOR ishlaydi, aniq shifokor ismi aytilmaydi
 - Shifokor vaqtini aytganda oxirida har doim qosh: Jadval ozgarishi mumkin, aniq vaqt uchun call-markaz bilan boganing: +998712103030
-- Birinchi xabarga faqat: Salom! Saba Darmon klinikasiga xush kelibsiz. Sizga qanday yordam bera olaman?
 - Qisqa javob ber, keraksiz gap qoshma
 - Uylab topilgan sozlarni ishlatma
 - Har javob oxirida bitta tabiiy savol ber
@@ -229,6 +228,86 @@ MASSAJ:
 - Umumiy: 80,000 | Katta: 200,000"""
 
 # =========================
+# INLINE KEYBOARD RESPONSES
+# =========================
+
+SHIFOKORLAR_TEXT = """👨‍⚕️ Qaysi mutaxassis kerak?"""
+
+SHIFOKORLAR_KEYBOARD = {
+    "inline_keyboard": [
+        [
+            {"text": "❤️ Kardiolog", "callback_data": "doc_kardiolog"},
+            {"text": "🫁 LOR", "callback_data": "doc_lor"}
+        ],
+        [
+            {"text": "👶 Pediatr", "callback_data": "doc_pediatr"},
+            {"text": "🧬 Urolog", "callback_data": "doc_urolog"}
+        ],
+        [
+            {"text": "🩺 Ginekolog", "callback_data": "doc_ginekolog"},
+            {"text": "🧠 Nevrolog", "callback_data": "doc_nevrolog"}
+        ],
+        [
+            {"text": "🔬 Endokrinolog", "callback_data": "doc_endokrinolog"},
+            {"text": "🍽 Gastroenterolog", "callback_data": "doc_gastro"}
+        ],
+        [
+            {"text": "✂️ Xirurg", "callback_data": "doc_xirurg"},
+            {"text": "🗣 Logoped", "callback_data": "doc_logoped"}
+        ],
+        [{"text": "⬅️ Orqaga", "callback_data": "main_menu"}]
+    ]
+}
+
+DOCTORS_INFO = {
+    "doc_kardiolog": "❤️ Kardiologlar:\n\n👨‍⚕️ Xusanov Abdurrasul\n   PN-SB 07:00-13:00\n   Birlamchi: 150,000 | Takroriy: 75,000\n\n👩‍⚕️ Abdukarimova Nigora\n   PN-SB 09:00-16:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
+    "doc_lor": "🫁 LOR mutaxassislar:\n\n👨‍⚕️ Omonjonov Husniddin\n   PN-JM 09:00-18:00\n   Birlamchi: 200,000 | Takroriy: 75,000\n\n👩‍⚕️ Alimjonova Komila\n   Seshanba, Payshanba, Shanba 09:00-14:00\n   Birlamchi: 150,000 | Takroriy: 50,000",
+    "doc_pediatr": "👶 Pediatr:\n\n👩‍⚕️ Kamilova Durdonaxon\n   PN-SB 09:00-12:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
+    "doc_urolog": "🧬 Urologlar:\n\n👨‍⚕️ Giyasov Qahramon\n   PN-SB 08:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000\n\n👨‍⚕️ Yuldashev Jasur\n   PN-SB 14:00-17:00\n   Birlamchi: 200,000 | Takroriy: 100,000",
+    "doc_ginekolog": "🩺 Ginekologlar:\n\n👩‍⚕️ Isanbaeva Landish\n   PN-SB 14:00-17:00\n   Birlamchi: 450,000 | Yozilish: +998508786015\n\n👩‍⚕️ Azizova Zulxumor\n   Birlamchi: 500,000 | Takroriy: 150,000\n   Yozilish: +998998739703\n\n👩‍⚕️ Tursunova Nazokat\n   Birlamchi: 300,000\n   Yozilish: Hamshira Lobar +998977060941\n\n👩‍⚕️ Samadova Guzal\n   PN-JM 09:00-14:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
+    "doc_nevrolog": "🧠 Nevrologlar:\n\n👩‍⚕️ Agzamova Gulmira\n   PN-SB 09:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000\n\n👩‍⚕️ Ganieva Lobar (Bolalar nevologi)\n   PN-SB 09:30-13:00\n   Birlamchi: 200,000",
+    "doc_endokrinolog": "🔬 Endokrinolog:\n\n👩‍⚕️ Azizova Nodira\n   PN-SB 09:00-15:00\n   Birlamchi: 300,000 | Takroriy: 150,000",
+    "doc_gastro": "🍽 Gastroenterolog:\n\n👨‍⚕️ Yahyayev Abduhakim\n   PN-SB 09:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000",
+    "doc_xirurg": "✂️ Xirurglar:\n\n👨‍⚕️ Yunusov Seydamet\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000\n\n👨‍⚕️ Xusnidinov Nizomiddin (Jarroh-onkolog)\n   PN-SB 10:00-17:00\n   Birlamchi: 150,000\n\n👨‍⚕️ Prof. Adilxodjaev Asqar (Jarroh-onkolog)\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000",
+    "doc_logoped": "🗣 Logoped:\n\n👩‍⚕️ Komilova Xurshida\n   PN-SB 14:00-16:00\n   Birlamchi: 120,000 | Takroriy: 80,000",
+}
+
+TAHLILLAR_TEXT = """🧪 Asosiy tahlillar:\n
+• Umumiy qon tahlili: 60,000
+• TTG: 100,000 | T3, T4: 85,000
+• Vitamin D: 200,000 | B12: 250,000
+• Gepatit B/S: 60,000 | HIV: 110,000
+• Glyukoza: 40,000 | HbA1c: 120,000
+• ALT/AST: 45,000 | Kreatinin: 45,000
+• OAM siydik: 50,000
+• Spermogramma: 130,000
+
+Batafsil: 📞 +998712103030"""
+
+MANZIL_TEXT = """📍 Manzil:\nToshkent, Shayxontohur tumani, Nurafshon kochasi 7A/3\n\n🗺 Xarita: https://maps.app.goo.gl/EYXxv85qVJ7Cc1qd7\n\n🕐 Ish vaqti: Dushanba-Shanba\nYakshanba: faqat LOR ishlaydi"""
+
+TELEFON_TEXT = """📞 Telefon: +998712103030\n\n🕐 Operator ish vaqti:\nDushanba-Shanba 08:00-22:00"""
+
+BACK_KEYBOARD = {
+    "inline_keyboard": [
+        [{"text": "⬅️ Orqaga", "callback_data": "main_menu"}]
+    ]
+}
+
+MAIN_KEYBOARD = {
+    "inline_keyboard": [
+        [
+            {"text": "👨‍⚕️ Shifokorlar", "callback_data": "menu_shifokorlar"},
+            {"text": "🧪 Tahlillar", "callback_data": "menu_tahlillar"}
+        ],
+        [
+            {"text": "📍 Manzil", "callback_data": "menu_manzil"},
+            {"text": "📞 Telefon", "callback_data": "menu_telefon"}
+        ]
+    ]
+}
+
+# =========================
 # TELEGRAM REQUEST
 # =========================
 
@@ -246,11 +325,28 @@ def telegram_request(method, data):
 # SEND MESSAGE
 # =========================
 
-def send_message(chat_id, text):
-    # Telegram 4096 belgi limitini handle qilish
+def send_message(chat_id, text, keyboard=None):
     if len(text) > 4096:
         text = text[:4090] + "..."
-    telegram_request("sendMessage", {"chat_id": chat_id, "text": text})
+    data = {"chat_id": chat_id, "text": text}
+    if keyboard:
+        data["reply_markup"] = json.dumps(keyboard)
+    telegram_request("sendMessage", data)
+
+def edit_message(chat_id, message_id, text, keyboard=None):
+    data = {"chat_id": chat_id, "message_id": message_id, "text": text}
+    if keyboard:
+        data["reply_markup"] = json.dumps(keyboard)
+    try:
+        telegram_request("editMessageText", data)
+    except Exception as e:
+        print(f"Edit xato: {e}")
+
+def answer_callback(callback_id):
+    try:
+        telegram_request("answerCallbackQuery", {"callback_query_id": callback_id})
+    except Exception as e:
+        print(f"Callback xato: {e}")
 
 # =========================
 # TYPING INDIKATOR
@@ -293,7 +389,7 @@ def send_to_crm(user_id, username, first_name, text, reply):
 # =========================
 
 def get_updates(offset=None):
-    params = {"timeout": 30, "allowed_updates": ["message"]}
+    params = {"timeout": 30, "allowed_updates": ["message", "callback_query"]}
     if offset:
         params["offset"] = offset
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
@@ -330,6 +426,45 @@ def check_faq(text):
         if key in text_lower:
             return value
     return None
+
+# =========================
+# CALLBACK HANDLER
+# =========================
+
+def handle_callback(callback):
+    callback_id = callback["id"]
+    data = callback["data"]
+    chat_id = callback["message"]["chat"]["id"]
+    message_id = callback["message"]["message_id"]
+    user = callback.get("from", {})
+    username = user.get("username")
+    first_name = user.get("first_name", "")
+
+    answer_callback(callback_id)
+
+    if data == "main_menu":
+        edit_message(chat_id, message_id,
+            "Salom! Saba Darmon klinikasiga xush kelibsiz.\nSizga qanday yordam bera olaman?",
+            MAIN_KEYBOARD)
+
+    elif data == "menu_shifokorlar":
+        edit_message(chat_id, message_id, SHIFOKORLAR_TEXT, SHIFOKORLAR_KEYBOARD)
+
+    elif data == "menu_tahlillar":
+        edit_message(chat_id, message_id, TAHLILLAR_TEXT, BACK_KEYBOARD)
+
+    elif data == "menu_manzil":
+        edit_message(chat_id, message_id, MANZIL_TEXT, BACK_KEYBOARD)
+
+    elif data == "menu_telefon":
+        edit_message(chat_id, message_id, TELEFON_TEXT, BACK_KEYBOARD)
+
+    elif data in DOCTORS_INFO:
+        note = "\n\n⚠️ Jadval o'zgarishi mumkin, aniq vaqt uchun:\n📞 +998712103030"
+        edit_message(chat_id, message_id,
+            DOCTORS_INFO[data] + note,
+            BACK_KEYBOARD)
+        send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DOCTORS_INFO[data])
 
 # =========================
 # AI REPLY
@@ -386,7 +521,7 @@ def main():
             if now.hour == 20 and not report_sent_today:
                 send_daily_report()
             if now.hour == 21:
-                report_sent_today = False  # Ertangi kun uchun reset
+                report_sent_today = False
 
             result = get_updates(offset)
             if not result.get("ok"):
@@ -394,6 +529,12 @@ def main():
 
             for update in result.get("result", []):
                 offset = update["update_id"] + 1
+
+                # Inline tugma bosildi
+                if "callback_query" in update:
+                    handle_callback(update["callback_query"])
+                    continue
+
                 message = update.get("message", {})
                 text = message.get("text", "")
                 chat_id = message.get("chat", {}).get("id")
@@ -404,17 +545,16 @@ def main():
                 if not text or not chat_id:
                     continue
 
-                # /start va boshqa komandalar
+                # Komandalar
                 if text.startswith("/"):
                     if text == "/start":
                         send_typing(chat_id)
                         send_message(chat_id,
                             "Salom! 👋 Saba Darmon klinikasiga xush kelibsiz.\n\n"
-                            "Shifokorlar, tahlillar, narxlar yoki manzil haqida "
-                            "so'ragan savolingizga javob beramiz.\n\n"
-                            "Sizga qanday yordam bera olaman?"
+                            "Sizga qanday yordam bera olaman?",
+                            MAIN_KEYBOARD
                         )
-                    elif text == "/stats" and user_id in ADMIN_IDS:
+                    elif text.startswith("/stats") and user_id in ADMIN_IDS:
                         send_typing(chat_id)
                         top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
                         top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
