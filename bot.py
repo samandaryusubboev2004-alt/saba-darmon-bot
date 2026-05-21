@@ -58,12 +58,16 @@ def update_analytics(user_id, text):
     topic = detect_topic(text)
     analytics["topics"][topic] += 1
 
-def send_daily_report():
-    today = datetime.now().date()
-    if analytics["last_report"] == today:
-        return
-    analytics["last_report"] = today
+# =========================
+# DAILY REPORT — BUG TUZATILDI
+# =========================
 
+report_sent_today = False
+
+def send_daily_report():
+    global report_sent_today
+
+    today = datetime.now().date()
     top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
     top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
 
@@ -90,6 +94,8 @@ def send_daily_report():
     analytics["unique_users"] = set()
     analytics["hourly"] = defaultdict(int)
     analytics["topics"] = defaultdict(int)
+    analytics["last_report"] = today
+    report_sent_today = True
 
 # =========================
 # FAQ SYSTEM
@@ -240,6 +246,19 @@ def send_message(chat_id, text):
     telegram_request("sendMessage", {"chat_id": chat_id, "text": text})
 
 # =========================
+# TYPING INDIKATOR — YANGI
+# =========================
+
+def send_typing(chat_id):
+    try:
+        telegram_request("sendChatAction", {
+            "chat_id": chat_id,
+            "action": "typing"
+        })
+    except Exception as e:
+        print(f"Typing xato: {e}")
+
+# =========================
 # CRM
 # =========================
 
@@ -347,16 +366,24 @@ def get_ai_reply(chat_id, text):
 # =========================
 
 def main():
+    global report_sent_today
+
     print("Bot ishga tushdi!")
     offset = None
+
     while True:
         now = datetime.now()
-        if now.hour == 20 and now.minute == 0:
+
+        # Daily report — faqat bir marta soat 20:00 da
+        if now.hour == 20 and not report_sent_today:
             send_daily_report()
+        if now.hour == 21:
+            report_sent_today = False  # Ertangi kun uchun reset
 
         result = get_updates(offset)
         if not result.get("ok"):
             continue
+
         for update in result.get("result", []):
             offset = update["update_id"] + 1
             message = update.get("message", {})
@@ -368,13 +395,28 @@ def main():
 
             if not text or not chat_id:
                 continue
+
+            # /start va boshqa komandalar — YANGI
             if text.startswith("/"):
+                if text == "/start":
+                    send_typing(chat_id)
+                    send_message(chat_id,
+                        "Salom! 👋 Saba Darmon klinikasiga xush kelibsiz.\n\n"
+                        "Shifokorlar, tahlillar, narxlar yoki manzil haqida "
+                        "so'ragan savolingizga javob beramiz.\n\n"
+                        "Sizga qanday yordam bera olaman?"
+                    )
                 continue
+
             if not check_rate_limit(chat_id):
                 send_message(chat_id, "Juda tez yozmoqdasiz, biroz kuting.")
                 continue
 
             update_analytics(user_id, text)
+
+            # Typing indikator — javobdan OLDIN
+            send_typing(chat_id)
+
             reply = get_ai_reply(chat_id, text)
             send_message(chat_id, reply)
             send_to_crm(user_id, username, first_name, text, reply)
