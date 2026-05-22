@@ -278,19 +278,24 @@ SHIFOKORLAR_KEYBOARD = {
 DIAGNOSTIKA_KEYBOARD = {
     "inline_keyboard": [
         [
-            {"text": "🔊  UZI", "callback_data": "diag_uzi"},
-            {"text": "☢️  Rentgen / KT", "callback_data": "diag_rentgen"}
+            {"text": "🔊  UZI / Doppler", "callback_data": "diag_uzi"},
+            {"text": "☢️  Rentgen / MSKT", "callback_data": "diag_rentgen"}
         ],
         [
-            {"text": "❤️  EKG / Xolter", "callback_data": "diag_ekg"},
-            {"text": "🧠  EEG", "callback_data": "diag_eeg"}
+            {"text": "❤️  Kardiologiya", "callback_data": "diag_ekg"},
+            {"text": "🧠  Nevrologiya", "callback_data": "diag_eeg"}
         ],
         [
-            {"text": "🔭  Gastroskopiya", "callback_data": "diag_gastro"},
-            {"text": "💊  Fizioterapiya", "callback_data": "diag_fizioterapiya"}
+            {"text": "🔭  EGDS", "callback_data": "diag_gastro"},
+            {"text": "🩺  Ginekologik protsedura", "callback_data": "diag_ginek"}
         ],
         [
-            {"text": "💉  Protsedura / Massaj", "callback_data": "diag_protsedura"}
+            {"text": "💊  Fizioterapiya / Xalq tabobati", "callback_data": "diag_fizioterapiya"},
+            {"text": "💉  Protsedura", "callback_data": "diag_protsedura"}
+        ],
+        [
+            {"text": "💆  Massaj", "callback_data": "diag_massaj"},
+            {"text": "🧪  Kimyoterapiya", "callback_data": "diag_kimyo"}
         ],
         [{"text": "⬅️  Orqaga", "callback_data": "main_menu"}]
     ]
@@ -333,7 +338,7 @@ DOCTORS_INFO = {
 
 DIAGNOSTIKA_INFO = {
     "diag_uzi": (
-        "🔊 UZI xizmatlari:\n\n"
+        "🔊 UZI / Doppler / Sonoelastografiya:\n\n"
         "• Buyrak va siydik pufagi — 150,000\n"
         "• Prostata (rektal) — 130,000\n"
         "• Jigar va o't pufagi — 120,000\n"
@@ -341,53 +346,84 @@ DIAGNOSTIKA_INFO = {
         "• Qorin bo'shlig'i — 220,000\n"
         "• Qalqonsimon bez — 120,000\n"
         "• Ko'krak bezi — 180,000\n"
-        "• Yurak (EXO) — 180,000\n"
+        "• Yurak (EXOKARDIYOGRAFIYA) — 180,000\n"
         "• Homiladorlik (12 haftagacha) — 100,000\n"
         "• Homiladorlik (13-40 hafta) — 140,000\n"
         "• Follikulometriya — 60,000\n"
-        "• Doppler (pastki oyoqlar) — 120,000"
+        "• Doppler (pastki oyoqlar) — 120,000\n"
+        "• Sonoelastografiya — batafsil: 📞 +998712103030"
     ),
     "diag_rentgen": (
-        "☢️ Rentgen va KT:\n\n"
-        "• Rentgen — 130,000 - 170,000\n"
-        "• MSKT / KT — 320,000 - 420,000\n\n"
+        "☢️ Rentgen va MSKT:\n\n"
+        "• Rentgenografiya — 130,000 - 170,000\n"
+        "• MSKT (Multisrезли KT) — 320,000 - 420,000\n\n"
         "Batafsil ma'lumot uchun:\n📞 +998712103030"
     ),
     "diag_ekg": (
-        "❤️ EKG va Xolter:\n\n"
+        "❤️ Kardiologiya diagnostikasi:\n\n"
         "• EKG — 50,000\n"
-        "• Xolter (kunlik monitoring) — 200,000\n"
-        "• Kolposkopiya — 190,000"
+        "• Xolter EKG (kunlik monitoring) — 200,000\n"
+        "• Uyda EKG — batafsil: 📞 +998712103030\n"
+        "• SMAD (qon bosimi monitoringi) — batafsil: 📞 +998712103030\n"
+        "• EKG 4-qavat — batafsil: 📞 +998712103030\n"
+        "• Check-up tekshiruvi — batafsil: 📞 +998712103030"
     ),
     "diag_eeg": (
-        "🧠 EEG:\n\n"
-        "• EEG — 120,000\n"
-        "• Video-EEG — 400,000"
+        "🧠 Nevrologiya diagnostikasi:\n\n"
+        "• EEG (Elektroensefalografiya) — 120,000\n"
+        "• Video-EEG — 400,000\n"
+        "• Tungi EEG monitoringi — batafsil: 📞 +998712103030\n"
+        "• ECHO EG (Exoensefalografiya) — batafsil: 📞 +998712103030\n"
+        "• Ignoterapiya (Akupunktura) — batafsil: 📞 +998712103030"
     ),
     "diag_gastro": (
-        "🔭 Endoskopiya:\n\n"
+        "🔭 EGDS (Ezofagogastroduodenoskopiya):\n\n"
         "• EGDS / Gastroskopiya — 350,000 - 780,000\n"
         "• Kolonoskopiya — 450,000 - 880,000\n\n"
         "Narx xizmat turiga qarab farq qiladi.\n"
         "Batafsil: 📞 +998712103030"
     ),
+    "diag_ginek": (
+        "🩺 Ginekologik protseduralar:\n\n"
+        "• Kolposkopiya — 190,000\n"
+        "• Ginekologik protseduralar — batafsil: 📞 +998712103030"
+    ),
     "diag_fizioterapiya": (
-        "💊 Fizioterapiya:\n\n"
+        "💊 Fizioterapiya va Xalq tabobati:\n\n"
+        "Fizioterapiya:\n"
         "• Elektroforez — 45,000\n"
         "• Magnit terapiya — 80,000\n"
         "• UVT — 50,000\n"
         "• Ozonoterapiya — 60,000\n"
-        "• VLOK — 50,000"
+        "• VLOK — 50,000\n\n"
+        "Xalq tabobati (invaziv yo'nalish):\n"
+        "• Hijoma — batafsil: 📞 +998712103030\n"
+        "• Zuluk (girudoterapiya) — batafsil: 📞 +998712103030\n"
+        "• Ignoterapiya — batafsil: 📞 +998712103030\n"
+        "• Aurikulyar terapiya — batafsil: 📞 +998712103030\n"
+        "• Su-jok terapiya — batafsil: 📞 +998712103030\n"
+        "• Davolovchi sauna — batafsil: 📞 +998712103030"
     ),
     "diag_protsedura": (
-        "💉 Protsedura va Massaj:\n\n"
-        "Protsedura:\n"
-        "• Mushak ichiga ukol — 20,000\n"
-        "• Vena (200 ml) — 50,000\n"
-        "• Vena (400 ml) — 95,000\n\n"
-        "Massaj:\n"
+        "💉 Protsedura xonasi:\n\n"
+        "• Mushak ichiga ukol (v/m) — 20,000\n"
+        "• Vena ichiga (v/v struyno) — batafsil: 📞 +998712103030\n"
+        "• Tomchi (200 ml) — 50,000\n"
+        "• Tomchi (400 ml) — 95,000\n"
+        "• Tomchi (1000 ml) — batafsil: 📞 +998712103030\n"
+        "• O'mrov osti kateter — batafsil: 📞 +998712103030"
+    ),
+    "diag_massaj": (
+        "💆 Massaj xizmatlari:\n\n"
         "• Umumiy massaj — 80,000\n"
-        "• Katta massaj — 200,000"
+        "• Katta massaj — 200,000\n"
+        "• Bolalar massaji — batafsil: 📞 +998712103030"
+    ),
+    "diag_kimyo": (
+        "🧪 Ambulatoriya kimyoterapiyasi:\n\n"
+        "Onkologik kasalliklar uchun ambulatoriya\n"
+        "sharoitida kimyoterapiya o'tkaziladi.\n\n"
+        "Batafsil ma'lumot va narxlar uchun:\n📞 +998712103030"
     ),
 }
 
@@ -572,8 +608,7 @@ def handle_callback(callback):
         send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DOCTORS_INFO[data])
 
     elif data in DIAGNOSTIKA_INFO:
-        note = "\n\n📞 Batafsil: +998712103030"
-        edit_message(chat_id, message_id, DIAGNOSTIKA_INFO[data] + note, BACK_DIAGNOSTIKA)
+        edit_message(chat_id, message_id, DIAGNOSTIKA_INFO[data], BACK_DIAGNOSTIKA)
         send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DIAGNOSTIKA_INFO[data])
 
 # =========================
