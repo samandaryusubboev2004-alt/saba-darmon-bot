@@ -70,14 +70,11 @@ report_sent_today = False
 
 def send_daily_report():
     global report_sent_today
-
     today = datetime.now().date()
     top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
     top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
-
     topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)])
     hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours])
-
     report = (
         f"📊 Kunlik hisobot — {today}\n\n"
         f"👥 Yangi mijozlar: {len(analytics['unique_users'])} ta\n"
@@ -85,15 +82,10 @@ def send_daily_report():
         f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
         f"⏰ Eng faol vaqt:\n{hours_text}"
     )
-
     try:
-        telegram_request("sendMessage", {
-            "chat_id": CRM_CHANNEL_ID,
-            "text": report
-        })
+        telegram_request("sendMessage", {"chat_id": CRM_CHANNEL_ID, "text": report})
     except Exception as e:
         print(f"Hisobot xato: {e}")
-
     analytics["total_messages"] = 0
     analytics["unique_users"] = set()
     analytics["hourly"] = defaultdict(int)
@@ -228,84 +220,197 @@ MASSAJ:
 - Umumiy: 80,000 | Katta: 200,000"""
 
 # =========================
-# INLINE KEYBOARD RESPONSES
+# KEYBOARDS
 # =========================
 
-SHIFOKORLAR_TEXT = """👨‍⚕️ Qaysi mutaxassis kerak?"""
+MAIN_KEYBOARD = {
+    "inline_keyboard": [
+        [
+            {"text": "👨‍⚕️  Shifokorlar", "callback_data": "menu_shifokorlar"},
+            {"text": "🧪  Tahlillar", "callback_data": "menu_tahlillar"}
+        ],
+        [
+            {"text": "🔬  Diagnostika", "callback_data": "menu_diagnostika"},
+            {"text": "📍  Manzil", "callback_data": "menu_manzil"}
+        ],
+        [
+            {"text": "📞  Telefon", "callback_data": "menu_telefon"}
+        ]
+    ]
+}
 
 SHIFOKORLAR_KEYBOARD = {
     "inline_keyboard": [
         [
-            {"text": "❤️ Kardiolog", "callback_data": "doc_kardiolog"},
-            {"text": "🫁 LOR", "callback_data": "doc_lor"}
+            {"text": "❤️  Kardiolog", "callback_data": "doc_kardiolog"},
+            {"text": "🫁  LOR", "callback_data": "doc_lor"}
         ],
         [
-            {"text": "👶 Pediatr", "callback_data": "doc_pediatr"},
-            {"text": "🧬 Urolog", "callback_data": "doc_urolog"}
+            {"text": "👶  Pediatr", "callback_data": "doc_pediatr"},
+            {"text": "🧬  Urolog", "callback_data": "doc_urolog"}
         ],
         [
-            {"text": "🩺 Ginekolog", "callback_data": "doc_ginekolog"},
-            {"text": "🧠 Nevrolog", "callback_data": "doc_nevrolog"}
+            {"text": "🩺  Ginekolog", "callback_data": "doc_ginekolog"},
+            {"text": "🧠  Nevrolog", "callback_data": "doc_nevrolog"}
         ],
         [
-            {"text": "🔬 Endokrinolog", "callback_data": "doc_endokrinolog"},
-            {"text": "🍽 Gastroenterolog", "callback_data": "doc_gastro"}
+            {"text": "🔬  Endokrinolog", "callback_data": "doc_endokrinolog"},
+            {"text": "🍽  Gastroenterolog", "callback_data": "doc_gastro"}
         ],
         [
-            {"text": "✂️ Xirurg", "callback_data": "doc_xirurg"},
-            {"text": "🗣 Logoped", "callback_data": "doc_logoped"}
+            {"text": "✂️  Xirurg / Onkolog", "callback_data": "doc_xirurg"},
+            {"text": "🗣  Logoped", "callback_data": "doc_logoped"}
         ],
-        [{"text": "⬅️ Orqaga", "callback_data": "main_menu"}]
+        [{"text": "⬅️  Orqaga", "callback_data": "main_menu"}]
     ]
 }
+
+DIAGNOSTIKA_KEYBOARD = {
+    "inline_keyboard": [
+        [
+            {"text": "🔊  UZI", "callback_data": "diag_uzi"},
+            {"text": "☢️  Rentgen / MSKT", "callback_data": "diag_rentgen"}
+        ],
+        [
+            {"text": "❤️  EKG / Xolter", "callback_data": "diag_ekg"},
+            {"text": "🧠  EEG", "callback_data": "diag_eeg"}
+        ],
+        [
+            {"text": "🔭  Gastroskopiya", "callback_data": "diag_gastro"},
+            {"text": "💊  Fizioterapiya", "callback_data": "diag_fizioterapiya"}
+        ],
+        [
+            {"text": "💉  Protsedura / Massaj", "callback_data": "diag_protsedura"}
+        ],
+        [{"text": "⬅️  Orqaga", "callback_data": "main_menu"}]
+    ]
+}
+
+BACK_KEYBOARD = {
+    "inline_keyboard": [
+        [{"text": "⬅️  Orqaga", "callback_data": "main_menu"}]
+    ]
+}
+
+BACK_SHIFOKORLAR = {
+    "inline_keyboard": [
+        [{"text": "⬅️  Orqaga", "callback_data": "menu_shifokorlar"}]
+    ]
+}
+
+BACK_DIAGNOSTIKA = {
+    "inline_keyboard": [
+        [{"text": "⬅️  Orqaga", "callback_data": "menu_diagnostika"}]
+    ]
+}
+
+# =========================
+# CONTENT
+# =========================
 
 DOCTORS_INFO = {
     "doc_kardiolog": "❤️ Kardiologlar:\n\n👨‍⚕️ Xusanov Abdurrasul\n   PN-SB 07:00-13:00\n   Birlamchi: 150,000 | Takroriy: 75,000\n\n👩‍⚕️ Abdukarimova Nigora\n   PN-SB 09:00-16:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
     "doc_lor": "🫁 LOR mutaxassislar:\n\n👨‍⚕️ Omonjonov Husniddin\n   PN-JM 09:00-18:00\n   Birlamchi: 200,000 | Takroriy: 75,000\n\n👩‍⚕️ Alimjonova Komila\n   Seshanba, Payshanba, Shanba 09:00-14:00\n   Birlamchi: 150,000 | Takroriy: 50,000",
     "doc_pediatr": "👶 Pediatr:\n\n👩‍⚕️ Kamilova Durdonaxon\n   PN-SB 09:00-12:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
     "doc_urolog": "🧬 Urologlar:\n\n👨‍⚕️ Giyasov Qahramon\n   PN-SB 08:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000\n\n👨‍⚕️ Yuldashev Jasur\n   PN-SB 14:00-17:00\n   Birlamchi: 200,000 | Takroriy: 100,000",
-    "doc_ginekolog": "🩺 Ginekologlar:\n\n👩‍⚕️ Isanbaeva Landish\n   PN-SB 14:00-17:00\n   Birlamchi: 450,000 | Yozilish: +998508786015\n\n👩‍⚕️ Azizova Zulxumor\n   Birlamchi: 500,000 | Takroriy: 150,000\n   Yozilish: +998998739703\n\n👩‍⚕️ Tursunova Nazokat\n   Birlamchi: 300,000\n   Yozilish: Hamshira Lobar +998977060941\n\n👩‍⚕️ Samadova Guzal\n   PN-JM 09:00-14:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
+    "doc_ginekolog": "🩺 Ginekologlar:\n\n👩‍⚕️ Isanbaeva Landish\n   PN-SB 14:00-17:00\n   Birlamchi: 450,000\n   Yozilish: +998508786015\n\n👩‍⚕️ Azizova Zulxumor\n   Birlamchi: 500,000 | Takroriy: 150,000 | VIP: 1,200,000\n   Yozilish: +998998739703\n\n👩‍⚕️ Tursunova Nazokat\n   Birlamchi: 300,000\n   Yozilish: Hamshira Lobar +998977060941\n\n👩‍⚕️ Samadova Guzal\n   PN-JM 09:00-14:00\n   Birlamchi: 150,000 | Takroriy: 75,000",
     "doc_nevrolog": "🧠 Nevrologlar:\n\n👩‍⚕️ Agzamova Gulmira\n   PN-SB 09:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000\n\n👩‍⚕️ Ganieva Lobar (Bolalar nevologi)\n   PN-SB 09:30-13:00\n   Birlamchi: 200,000",
     "doc_endokrinolog": "🔬 Endokrinolog:\n\n👩‍⚕️ Azizova Nodira\n   PN-SB 09:00-15:00\n   Birlamchi: 300,000 | Takroriy: 150,000",
     "doc_gastro": "🍽 Gastroenterolog:\n\n👨‍⚕️ Yahyayev Abduhakim\n   PN-SB 09:00-14:00\n   Birlamchi: 200,000 | Takroriy: 100,000",
-    "doc_xirurg": "✂️ Xirurglar:\n\n👨‍⚕️ Yunusov Seydamet\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000\n\n👨‍⚕️ Xusnidinov Nizomiddin (Jarroh-onkolog)\n   PN-SB 10:00-17:00\n   Birlamchi: 150,000\n\n👨‍⚕️ Prof. Adilxodjaev Asqar (Jarroh-onkolog)\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000",
+    "doc_xirurg": "✂️ Xirurglar / Jarroh-onkologlar:\n\n👨‍⚕️ Yunusov Seydamet\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000\n\n👨‍⚕️ Xusnidinov Nizomiddin\n   PN-SB 10:00-17:00\n   Birlamchi: 150,000\n\n👨‍⚕️ Prof. Adilxodjaev Asqar\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000\n\n👨‍⚕️ Satdiqov Qayrat (Proktolog)\n   PN-SB 09:00-15:00\n   Birlamchi: 200,000 | Takroriy: 100,000",
     "doc_logoped": "🗣 Logoped:\n\n👩‍⚕️ Komilova Xurshida\n   PN-SB 14:00-16:00\n   Birlamchi: 120,000 | Takroriy: 80,000",
 }
 
-TAHLILLAR_TEXT = """🧪 Asosiy tahlillar:\n
-• Umumiy qon tahlili: 60,000
-• TTG: 100,000 | T3, T4: 85,000
-• Vitamin D: 200,000 | B12: 250,000
-• Gepatit B/S: 60,000 | HIV: 110,000
-• Glyukoza: 40,000 | HbA1c: 120,000
-• ALT/AST: 45,000 | Kreatinin: 45,000
-• OAM siydik: 50,000
-• Spermogramma: 130,000
-
-Batafsil: 📞 +998712103030"""
-
-MANZIL_TEXT = """📍 Manzil:\nToshkent, Shayxontohur tumani, Nurafshon kochasi 7A/3\n\n🗺 Xarita: https://maps.app.goo.gl/EYXxv85qVJ7Cc1qd7\n\n🕐 Ish vaqti: Dushanba-Shanba\nYakshanba: faqat LOR ishlaydi"""
-
-TELEFON_TEXT = """📞 Telefon: +998712103030\n\n🕐 Operator ish vaqti:\nDushanba-Shanba 08:00-22:00"""
-
-BACK_KEYBOARD = {
-    "inline_keyboard": [
-        [{"text": "⬅️ Orqaga", "callback_data": "main_menu"}]
-    ]
+DIAGNOSTIKA_INFO = {
+    "diag_uzi": (
+        "🔊 UZI xizmatlari:\n\n"
+        "• Buyrak va siydik pufagi — 150,000\n"
+        "• Prostata (rektal) — 130,000\n"
+        "• Jigar va o't pufagi — 120,000\n"
+        "• Bachadon (transvaginal) — 130,000\n"
+        "• Qorin bo'shlig'i — 220,000\n"
+        "• Qalqonsimon bez — 120,000\n"
+        "• Ko'krak bezi — 180,000\n"
+        "• Yurak (EXO) — 180,000\n"
+        "• Homiladorlik (12 haftagacha) — 100,000\n"
+        "• Homiladorlik (13-40 hafta) — 140,000\n"
+        "• Follikulometriya — 60,000\n"
+        "• Doppler (pastki oyoqlar) — 120,000"
+    ),
+    "diag_rentgen": (
+        "☢️ Rentgen va KT:\n\n"
+        "• Rentgen — 130,000 - 170,000\n"
+        "• MSKT / KT — 320,000 - 420,000\n\n"
+        "Batafsil ma'lumot uchun:\n📞 +998712103030"
+    ),
+    "diag_ekg": (
+        "❤️ EKG va Xolter:\n\n"
+        "• EKG — 50,000\n"
+        "• Xolter (kunlik monitoring) — 200,000\n"
+        "• Kolposkopiya — 190,000"
+    ),
+    "diag_eeg": (
+        "🧠 EEG:\n\n"
+        "• EEG — 120,000\n"
+        "• Video-EEG — 400,000"
+    ),
+    "diag_gastro": (
+        "🔭 Endoskopiya:\n\n"
+        "• EGDS / Gastroskopiya — 350,000 - 780,000\n"
+        "• Kolonoskopiya — 450,000 - 880,000\n\n"
+        "Narx xizmat turiga qarab farq qiladi.\n"
+        "Batafsil: 📞 +998712103030"
+    ),
+    "diag_fizioterapiya": (
+        "💊 Fizioterapiya:\n\n"
+        "• Elektroforez — 45,000\n"
+        "• Magnit terapiya — 80,000\n"
+        "• UVT — 50,000\n"
+        "• Ozonoterapiya — 60,000\n"
+        "• VLOK — 50,000"
+    ),
+    "diag_protsedura": (
+        "💉 Protsedura va Massaj:\n\n"
+        "Protsedura:\n"
+        "• Mushak ichiga ukol — 20,000\n"
+        "• Vena (200 ml) — 50,000\n"
+        "• Vena (400 ml) — 95,000\n\n"
+        "Massaj:\n"
+        "• Umumiy massaj — 80,000\n"
+        "• Katta massaj — 200,000"
+    ),
 }
 
-MAIN_KEYBOARD = {
-    "inline_keyboard": [
-        [
-            {"text": "👨‍⚕️ Shifokorlar", "callback_data": "menu_shifokorlar"},
-            {"text": "🧪 Tahlillar", "callback_data": "menu_tahlillar"}
-        ],
-        [
-            {"text": "📍 Manzil", "callback_data": "menu_manzil"},
-            {"text": "📞 Telefon", "callback_data": "menu_telefon"}
-        ]
-    ]
-}
+TAHLILLAR_TEXT = (
+    "🧪 Asosiy tahlillar:\n\n"
+    "• Umumiy qon tahlili (22 ko'rsatkich) — 60,000\n"
+    "• TTG — 100,000 | T3, T4 erkin — 85,000\n"
+    "• Vitamin D — 200,000 | B12 — 250,000\n"
+    "• Insulin — 130,000 | Glyukoza — 40,000\n"
+    "• Ferritin — 120,000 | Temir — 70,000\n"
+    "• ALT / AST — 45,000 | Kreatinin — 45,000\n"
+    "• Gepatit B/S — 60,000 | HIV — 110,000\n"
+    "• OAM siydik — 50,000\n"
+    "• Spermogramma — 130,000\n"
+    "• PSA — 110,000 | AMG — 400,000\n"
+    "• D-dimer — 200,000 | Koagulogramma — 150,000\n\n"
+    "Batafsil: 📞 +998712103030"
+)
+
+MANZIL_TEXT = (
+    "📍 Manzil:\n"
+    "Toshkent, Shayxontohur tumani,\nNurafshon ko'chasi 7A/3\n\n"
+    "🗺 Xarita: https://maps.app.goo.gl/EYXxv85qVJ7Cc1qd7\n\n"
+    "🕐 Ish vaqti:\n"
+    "Dushanba - Shanba\n"
+    "Yakshanba: faqat LOR ishlaydi"
+)
+
+TELEFON_TEXT = (
+    "📞 Telefon: +998712103030\n\n"
+    "🕐 Operator ish vaqti:\n"
+    "Dushanba - Shanba, 08:00 - 22:00"
+)
 
 # =========================
 # TELEGRAM REQUEST
@@ -320,10 +425,6 @@ def telegram_request(method, data):
     )
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read())
-
-# =========================
-# SEND MESSAGE
-# =========================
 
 def send_message(chat_id, text, keyboard=None):
     if len(text) > 4096:
@@ -348,16 +449,9 @@ def answer_callback(callback_id):
     except Exception as e:
         print(f"Callback xato: {e}")
 
-# =========================
-# TYPING INDIKATOR
-# =========================
-
 def send_typing(chat_id):
     try:
-        telegram_request("sendChatAction", {
-            "chat_id": chat_id,
-            "action": "typing"
-        })
+        telegram_request("sendChatAction", {"chat_id": chat_id, "action": "typing"})
     except Exception as e:
         print(f"Typing xato: {e}")
 
@@ -377,10 +471,7 @@ def send_to_crm(user_id, username, first_name, text, reply):
             f"💬 Savol: {text}\n"
             f"🤖 Javob: {reply[:200]}..."
         )
-        telegram_request("sendMessage", {
-            "chat_id": CRM_CHANNEL_ID,
-            "text": crm_text
-        })
+        telegram_request("sendMessage", {"chat_id": CRM_CHANNEL_ID, "text": crm_text})
     except Exception as e:
         print(f"CRM xato: {e}")
 
@@ -394,10 +485,7 @@ def get_updates(offset=None):
         params["offset"] = offset
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
     body = json.dumps(params).encode("utf-8")
-    req = urllib.request.Request(
-        url, data=body,
-        headers={"Content-Type": "application/json"}
-    )
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=35) as resp:
             return json.loads(resp.read())
@@ -405,20 +493,12 @@ def get_updates(offset=None):
         print(f"Update error: {e}")
         return {"ok": False, "result": []}
 
-# =========================
-# RATE LIMIT
-# =========================
-
 def check_rate_limit(chat_id):
     now = time.time()
     if now - last_request_time[chat_id] < 1.5:
         return False
     last_request_time[chat_id] = now
     return True
-
-# =========================
-# FAQ CHECK
-# =========================
 
 def check_faq(text):
     text_lower = text.lower()
@@ -444,14 +524,17 @@ def handle_callback(callback):
 
     if data == "main_menu":
         edit_message(chat_id, message_id,
-            "Salom! Saba Darmon klinikasiga xush kelibsiz.\nSizga qanday yordam bera olaman?",
+            "Saba Darmon klinikasiga xush kelibsiz!\nSizga qanday yordam bera olaman?",
             MAIN_KEYBOARD)
 
     elif data == "menu_shifokorlar":
-        edit_message(chat_id, message_id, SHIFOKORLAR_TEXT, SHIFOKORLAR_KEYBOARD)
+        edit_message(chat_id, message_id, "👨‍⚕️ Qaysi mutaxassis kerak?", SHIFOKORLAR_KEYBOARD)
 
     elif data == "menu_tahlillar":
         edit_message(chat_id, message_id, TAHLILLAR_TEXT, BACK_KEYBOARD)
+
+    elif data == "menu_diagnostika":
+        edit_message(chat_id, message_id, "🔬 Qaysi diagnostika xizmati kerak?", DIAGNOSTIKA_KEYBOARD)
 
     elif data == "menu_manzil":
         edit_message(chat_id, message_id, MANZIL_TEXT, BACK_KEYBOARD)
@@ -461,10 +544,13 @@ def handle_callback(callback):
 
     elif data in DOCTORS_INFO:
         note = "\n\n⚠️ Jadval o'zgarishi mumkin, aniq vaqt uchun:\n📞 +998712103030"
-        edit_message(chat_id, message_id,
-            DOCTORS_INFO[data] + note,
-            BACK_KEYBOARD)
+        edit_message(chat_id, message_id, DOCTORS_INFO[data] + note, BACK_SHIFOKORLAR)
         send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DOCTORS_INFO[data])
+
+    elif data in DIAGNOSTIKA_INFO:
+        note = "\n\n📞 Batafsil: +998712103030"
+        edit_message(chat_id, message_id, DIAGNOSTIKA_INFO[data] + note, BACK_DIAGNOSTIKA)
+        send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DIAGNOSTIKA_INFO[data])
 
 # =========================
 # AI REPLY
@@ -501,7 +587,7 @@ def get_ai_reply(chat_id, text):
 
     except Exception as e:
         print(f"Claude error: {e}")
-        return "Uzr, vaqtinchalik xatolik yuz berdi. Qayta urinib koring."
+        return "Uzr, vaqtinchalik xatolik yuz berdi. Qayta urinib ko'ring."
 
 # =========================
 # MAIN
@@ -517,7 +603,6 @@ def main():
         try:
             now = datetime.now()
 
-            # Daily report — faqat bir marta soat 20:00 da
             if now.hour == 20 and not report_sent_today:
                 send_daily_report()
             if now.hour == 21:
@@ -530,7 +615,6 @@ def main():
             for update in result.get("result", []):
                 offset = update["update_id"] + 1
 
-                # Inline tugma bosildi
                 if "callback_query" in update:
                     handle_callback(update["callback_query"])
                     continue
@@ -545,7 +629,6 @@ def main():
                 if not text or not chat_id:
                     continue
 
-                # Komandalar
                 if text.startswith("/"):
                     if text == "/start":
                         send_typing(chat_id)
