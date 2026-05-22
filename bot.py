@@ -217,7 +217,16 @@ PROTSEDURA:
 - Mushak ichiga: 20,000 | Vena 200ml: 50,000 | Vena 400ml: 95,000
 
 MASSAJ:
-- Umumiy: 80,000 | Katta: 200,000"""
+- Umumiy: 80,000 | Katta: 200,000
+
+TEZ TIBBIY YORDAM XIZMATI:
+- Shahar ichi (bir tomon): 400,000
+- Ikki tomon (borib-qaytish): 450,000
+- Uyga chaqirish: 400,000
+- Viloyatga: 400,000 + har km uchun 11,000
+- Tadbirlarda: 400,000 + soatiga 150,000
+- Skori (reanimobil) xizmati ham mavjud
+- Buyurtma va qoshimcha malumot: +998935755506"""
 
 # =========================
 # KEYBOARDS
