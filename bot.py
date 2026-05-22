@@ -423,25 +423,14 @@ TELEFON_TEXT = (
 )
 
 TEZ_YORDAM_TEXT = (
-    "🚑 Tez tibbiy yordam xizmati:
-
-"
-    "• Shahar ichi (bir tomon) — 400,000
-"
-    "• Ikki tomon (borib-qaytish) — 450,000
-"
-    "• Uyga chaqirish — 400,000
-"
-    "• Viloyatga — 400,000 + har km uchun 11,000
-"
-    "• Tadbirlarda — 400,000 + soatiga 150,000
-
-"
-    "🏥 Bizda skori (reanimobil) xizmati ham mavjud!
-
-"
-    "📞 Buyurtma va ma'lumot:
-+998935755506"
+    "🚑 Tez tibbiy yordam xizmati:\n\n"
+    "• Shahar ichi (bir tomon) — 400,000\n"
+    "• Ikki tomon (borib-qaytish) — 450,000\n"
+    "• Uyga chaqirish — 400,000\n"
+    "• Viloyatga — 400,000 + har km uchun 11,000\n"
+    "• Tadbirlarda — 400,000 + soatiga 150,000\n\n"
+    "🏥 Bizda skori (reanimobil) xizmati ham mavjud!\n\n"
+    "📞 Buyurtma va ma'lumot:\n+998935755506"
 )
 
 # =========================
