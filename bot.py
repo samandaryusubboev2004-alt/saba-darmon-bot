@@ -234,7 +234,8 @@ MAIN_KEYBOARD = {
             {"text": "📍  Manzil", "callback_data": "menu_manzil"}
         ],
         [
-            {"text": "📞  Telefon", "callback_data": "menu_telefon"}
+            {"text": "📞  Telefon", "callback_data": "menu_telefon"},
+            {"text": "🚑  Tez yordam", "callback_data": "menu_tezyordam"}
         ]
     ]
 }
@@ -269,7 +270,7 @@ DIAGNOSTIKA_KEYBOARD = {
     "inline_keyboard": [
         [
             {"text": "🔊  UZI", "callback_data": "diag_uzi"},
-            {"text": "☢️  Rentgen / MSKT", "callback_data": "diag_rentgen"}
+            {"text": "☢️  Rentgen / KT", "callback_data": "diag_rentgen"}
         ],
         [
             {"text": "❤️  EKG / Xolter", "callback_data": "diag_ekg"},
@@ -412,6 +413,28 @@ TELEFON_TEXT = (
     "Dushanba - Shanba, 08:00 - 22:00"
 )
 
+TEZ_YORDAM_TEXT = (
+    "🚑 Tez tibbiy yordam xizmati:
+
+"
+    "• Shahar ichi (bir tomon) — 400,000
+"
+    "• Ikki tomon (borib-qaytish) — 450,000
+"
+    "• Uyga chaqirish — 400,000
+"
+    "• Viloyatga — 400,000 + har km uchun 11,000
+"
+    "• Tadbirlarda — 400,000 + soatiga 150,000
+
+"
+    "🏥 Bizda skori (reanimobil) xizmati ham mavjud!
+
+"
+    "📞 Buyurtma va ma'lumot:
++998935755506"
+)
+
 # =========================
 # TELEGRAM REQUEST
 # =========================
@@ -541,6 +564,9 @@ def handle_callback(callback):
 
     elif data == "menu_telefon":
         edit_message(chat_id, message_id, TELEFON_TEXT, BACK_KEYBOARD)
+
+    elif data == "menu_tezyordam":
+        edit_message(chat_id, message_id, TEZ_YORDAM_TEXT, BACK_KEYBOARD)
 
     elif data in DOCTORS_INFO:
         note = "\n\n⚠️ Jadval o'zgarishi mumkin, aniq vaqt uchun:\n📞 +998712103030"
