@@ -3,15 +3,17 @@ import json
 import time
 import anthropic
 import urllib.request
+import urllib.error
 from collections import defaultdict
 from datetime import datetime
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 CRM_CHANNEL_ID = -1003999990660
 ADMIN_IDS = [
-    1810849960,  # admin 1
-    6592939925,  # admin 2
+    1810849960,
+    6592939925,
 ]
 
 claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -337,99 +339,21 @@ DOCTORS_INFO = {
 }
 
 DIAGNOSTIKA_INFO = {
-    "diag_uzi": (
-        "🔊 UZI / Doppler / Sonoelastografiya:\n\n"
-        "• Buyrak va siydik pufagi — 150,000\n"
-        "• Prostata (rektal) — 130,000\n"
-        "• Jigar va o't pufagi — 120,000\n"
-        "• Bachadon (transvaginal) — 130,000\n"
-        "• Qorin bo'shlig'i — 220,000\n"
-        "• Qalqonsimon bez — 120,000\n"
-        "• Ko'krak bezi — 180,000\n"
-        "• Yurak (EXOKARDIYOGRAFIYA) — 180,000\n"
-        "• Homiladorlik (12 haftagacha) — 100,000\n"
-        "• Homiladorlik (13-40 hafta) — 140,000\n"
-        "• Follikulometriya — 60,000\n"
-        "• Doppler (pastki oyoqlar) — 120,000\n"
-        "• Sonoelastografiya — batafsil: 📞 +998712103030"
-    ),
-    "diag_rentgen": (
-        "☢️ Rentgen va MSKT:\n\n"
-        "• Rentgenografiya — 130,000 - 170,000\n"
-        "• MSKT (Multisrезли KT) — 320,000 - 420,000\n\n"
-        "Batafsil ma'lumot uchun:\n📞 +998712103030"
-    ),
-    "diag_ekg": (
-        "❤️ Kardiologiya diagnostikasi:\n\n"
-        "• EKG — 50,000\n"
-        "• Xolter EKG (kunlik monitoring) — 200,000\n"
-        "• Uyda EKG — batafsil: 📞 +998712103030\n"
-        "• SMAD (qon bosimi monitoringi) — batafsil: 📞 +998712103030\n"
-        "• EKG 4-qavat — batafsil: 📞 +998712103030\n"
-        "• Check-up tekshiruvi — batafsil: 📞 +998712103030"
-    ),
-    "diag_eeg": (
-        "🧠 Nevrologiya diagnostikasi:\n\n"
-        "• EEG (Elektroensefalografiya) — 120,000\n"
-        "• Video-EEG — 400,000\n"
-        "• Tungi EEG monitoringi — batafsil: 📞 +998712103030\n"
-        "• ECHO EG (Exoensefalografiya) — batafsil: 📞 +998712103030\n"
-        "• Ignoterapiya (Akupunktura) — batafsil: 📞 +998712103030"
-    ),
-    "diag_gastro": (
-        "🔭 EGDS (Ezofagogastroduodenoskopiya):\n\n"
-        "• EGDS / Gastroskopiya — 350,000 - 780,000\n"
-        "• Kolonoskopiya — 450,000 - 880,000\n\n"
-        "Narx xizmat turiga qarab farq qiladi.\n"
-        "Batafsil: 📞 +998712103030"
-    ),
-    "diag_ginek": (
-        "🩺 Ginekologik protseduralar:\n\n"
-        "• Kolposkopiya — 190,000\n"
-        "• Ginekologik protseduralar — batafsil: 📞 +998712103030"
-    ),
-    "diag_fizioterapiya": (
-        "💊 Fizioterapiya va Xalq tabobati:\n\n"
-        "Fizioterapiya:\n"
-        "• Elektroforez — 45,000\n"
-        "• Magnit terapiya — 80,000\n"
-        "• UVT — 50,000\n"
-        "• Ozonoterapiya — 60,000\n"
-        "• VLOK — 50,000\n\n"
-        "Xalq tabobati (invaziv yo'nalish):\n"
-        "• Hijoma — batafsil: 📞 +998712103030\n"
-        "• Zuluk (girudoterapiya) — batafsil: 📞 +998712103030\n"
-        "• Ignoterapiya — batafsil: 📞 +998712103030\n"
-        "• Aurikulyar terapiya — batafsil: 📞 +998712103030\n"
-        "• Su-jok terapiya — batafsil: 📞 +998712103030\n"
-        "• Davolovchi sauna — batafsil: 📞 +998712103030"
-    ),
-    "diag_protsedura": (
-        "💉 Protsedura xonasi:\n\n"
-        "• Mushak ichiga ukol (v/m) — 20,000\n"
-        "• Vena ichiga (v/v struyno) — batafsil: 📞 +998712103030\n"
-        "• Tomchi (200 ml) — 50,000\n"
-        "• Tomchi (400 ml) — 95,000\n"
-        "• Tomchi (1000 ml) — batafsil: 📞 +998712103030\n"
-        "• O'mrov osti kateter — batafsil: 📞 +998712103030"
-    ),
-    "diag_massaj": (
-        "💆 Massaj xizmatlari:\n\n"
-        "• Umumiy massaj — 80,000\n"
-        "• Katta massaj — 200,000\n"
-        "• Bolalar massaji — batafsil: 📞 +998712103030"
-    ),
-    "diag_kimyo": (
-        "🧪 Ambulatoriya kimyoterapiyasi:\n\n"
-        "Onkologik kasalliklar uchun ambulatoriya\n"
-        "sharoitida kimyoterapiya o'tkaziladi.\n\n"
-        "Batafsil ma'lumot va narxlar uchun:\n📞 +998712103030"
-    ),
+    "diag_uzi": "🔊 UZI / Doppler:\n\n• Buyrak va siydik pufagi — 150,000\n• Prostata (rektal) — 130,000\n• Jigar va ot pufagi — 120,000\n• Bachadon (transvaginal) — 130,000\n• Qorin boshlighi — 220,000\n• Qalqonsimon bez — 120,000\n• Kokrak bezi — 180,000\n• Yurak (EXOKARDIYOGRAFIYA) — 180,000\n• Homiladorlik (12 haftagacha) — 100,000\n• Homiladorlik (13-40 hafta) — 140,000\n• Follikulometriya — 60,000\n• Doppler (pastki oyoqlar) — 120,000\n• Sonoelastografiya — batafsil: 📞 +998712103030",
+    "diag_rentgen": "☢️ Rentgen va MSKT:\n\n• Rentgenografiya — 130,000 - 170,000\n• MSKT (KT) — 320,000 - 420,000\n\nBatafsil: 📞 +998712103030",
+    "diag_ekg": "❤️ Kardiologiya diagnostikasi:\n\n• EKG — 50,000\n• Xolter EKG (kunlik) — 200,000\n• SMAD — batafsil: 📞 +998712103030\n• Check-up tekshiruvi — batafsil: 📞 +998712103030",
+    "diag_eeg": "🧠 Nevrologiya diagnostikasi:\n\n• EEG — 120,000\n• Video-EEG — 400,000\n• Tungi EEG — batafsil: 📞 +998712103030\n• Ignoterapiya — batafsil: 📞 +998712103030",
+    "diag_gastro": "🔭 EGDS (Gastroskopiya):\n\n• EGDS / Gastroskopiya — 350,000 - 780,000\n• Kolonoskopiya — 450,000 - 880,000\n\nBatafsil: 📞 +998712103030",
+    "diag_ginek": "🩺 Ginekologik protseduralar:\n\n• Kolposkopiya — 190,000\n• Boshqa protseduralar — batafsil: 📞 +998712103030",
+    "diag_fizioterapiya": "💊 Fizioterapiya va Xalq tabobati:\n\n• Elektroforez — 45,000\n• Magnit terapiya — 80,000\n• UVT — 50,000\n• Ozonoterapiya — 60,000\n• VLOK — 50,000\n• Hijoma — batafsil: 📞 +998712103030\n• Zuluk (girudoterapiya) — batafsil: 📞 +998712103030\n• Ignoterapiya — batafsil: 📞 +998712103030",
+    "diag_protsedura": "💉 Protsedura xonasi:\n\n• Mushak ichiga (v/m) — 20,000\n• Tomchi (200 ml) — 50,000\n• Tomchi (400 ml) — 95,000\n• Boshqa protseduralar — batafsil: 📞 +998712103030",
+    "diag_massaj": "💆 Massaj xizmatlari:\n\n• Umumiy massaj — 80,000\n• Katta massaj — 200,000\n• Bolalar massaji — batafsil: 📞 +998712103030",
+    "diag_kimyo": "🧪 Ambulatoriya kimyoterapiyasi:\n\nOnkologik kasalliklar uchun ambulatoriya sharoitida kimyoterapiya otkaziladi.\n\nBatafsil: 📞 +998712103030",
 }
 
 TAHLILLAR_TEXT = (
     "🧪 Asosiy tahlillar:\n\n"
-    "• Umumiy qon tahlili (22 ko'rsatkich) — 60,000\n"
+    "• Umumiy qon tahlili (22 korsatkich) — 60,000\n"
     "• TTG — 100,000 | T3, T4 erkin — 85,000\n"
     "• Vitamin D — 200,000 | B12 — 250,000\n"
     "• Insulin — 130,000 | Glyukoza — 40,000\n"
@@ -445,7 +369,7 @@ TAHLILLAR_TEXT = (
 
 MANZIL_TEXT = (
     "📍 Manzil:\n"
-    "Toshkent, Shayxontohur tumani,\nNurafshon ko'chasi 7A/3\n\n"
+    "Toshkent, Shayxontohur tumani,\nNurafshon kochasi 7A/3\n\n"
     "🗺 Xarita: https://maps.app.goo.gl/EYXxv85qVJ7Cc1qd7\n\n"
     "🕐 Ish vaqti:\n"
     "Dushanba - Shanba\n"
@@ -466,7 +390,7 @@ TEZ_YORDAM_TEXT = (
     "• Viloyatga — 400,000 + har km uchun 11,000\n"
     "• Tadbirlarda — 400,000 + soatiga 150,000\n\n"
     "🏥 Bizda skori (reanimobil) xizmati ham mavjud!\n\n"
-    "📞 Buyurtma va ma'lumot:\n+998935755506"
+    "📞 Buyurtma va malumot:\n+998935755506"
 )
 
 # =========================
@@ -476,10 +400,7 @@ TEZ_YORDAM_TEXT = (
 def telegram_request(method, data):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/{method}"
     body = json.dumps(data).encode("utf-8")
-    req = urllib.request.Request(
-        url, data=body,
-        headers={"Content-Type": "application/json"}
-    )
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read())
 
@@ -511,6 +432,52 @@ def send_typing(chat_id):
         telegram_request("sendChatAction", {"chat_id": chat_id, "action": "typing"})
     except Exception as e:
         print(f"Typing xato: {e}")
+
+# =========================
+# OVOZLI XABAR (GROQ WHISPER)
+# =========================
+
+def download_voice(file_id):
+    try:
+        result = telegram_request("getFile", {"file_id": file_id})
+        file_path = result["result"]["file_path"]
+        url = f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file_path}"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as resp:
+            return resp.read()
+    except Exception as e:
+        print(f"Ovoz yuklab olish xato: {e}")
+        return None
+
+def transcribe_voice(audio_data):
+    try:
+        import io
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file"; filename="voice.ogg"\r\n'
+            f"Content-Type: audio/ogg\r\n\r\n"
+        ).encode("utf-8") + audio_data + (
+            f"\r\n--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="model"\r\n\r\n'
+            f"whisper-large-v3\r\n"
+            f"--{boundary}--\r\n"
+        ).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/audio/transcriptions",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": f"multipart/form-data; boundary={boundary}"
+            }
+        )
+        with urllib.request.urlopen(req) as resp:
+            result = json.loads(resp.read())
+            return result.get("text", "")
+    except Exception as e:
+        print(f"Transkriptsiya xato: {e}")
+        return None
 
 # =========================
 # CRM
@@ -583,30 +550,22 @@ def handle_callback(callback):
         edit_message(chat_id, message_id,
             "Saba Darmon klinikasiga xush kelibsiz!\nSizga qanday yordam bera olaman?",
             MAIN_KEYBOARD)
-
     elif data == "menu_shifokorlar":
         edit_message(chat_id, message_id, "👨‍⚕️ Qaysi mutaxassis kerak?", SHIFOKORLAR_KEYBOARD)
-
     elif data == "menu_tahlillar":
         edit_message(chat_id, message_id, TAHLILLAR_TEXT, BACK_KEYBOARD)
-
     elif data == "menu_diagnostika":
         edit_message(chat_id, message_id, "🔬 Qaysi diagnostika xizmati kerak?", DIAGNOSTIKA_KEYBOARD)
-
     elif data == "menu_manzil":
         edit_message(chat_id, message_id, MANZIL_TEXT, BACK_KEYBOARD)
-
     elif data == "menu_telefon":
         edit_message(chat_id, message_id, TELEFON_TEXT, BACK_KEYBOARD)
-
     elif data == "menu_tezyordam":
         edit_message(chat_id, message_id, TEZ_YORDAM_TEXT, BACK_KEYBOARD)
-
     elif data in DOCTORS_INFO:
-        note = "\n\n⚠️ Jadval o'zgarishi mumkin, aniq vaqt uchun:\n📞 +998712103030"
+        note = "\n\n⚠️ Jadval ozgarishi mumkin, aniq vaqt uchun:\n📞 +998712103030"
         edit_message(chat_id, message_id, DOCTORS_INFO[data] + note, BACK_SHIFOKORLAR)
         send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DOCTORS_INFO[data])
-
     elif data in DIAGNOSTIKA_INFO:
         edit_message(chat_id, message_id, DIAGNOSTIKA_INFO[data], BACK_DIAGNOSTIKA)
         send_to_crm(user.get("id"), username, first_name, f"[Tugma] {data}", DIAGNOSTIKA_INFO[data])
@@ -646,7 +605,7 @@ def get_ai_reply(chat_id, text):
 
     except Exception as e:
         print(f"Claude error: {e}")
-        return "Uzr, vaqtinchalik xatolik yuz berdi. Qayta urinib ko'ring."
+        return "Uzr, vaqtinchalik xatolik yuz berdi. Qayta urinib koring."
 
 # =========================
 # MAIN
@@ -654,7 +613,6 @@ def get_ai_reply(chat_id, text):
 
 def main():
     global report_sent_today
-
     print("Bot ishga tushdi!")
     offset = None
 
@@ -679,13 +637,37 @@ def main():
                     continue
 
                 message = update.get("message", {})
-                text = message.get("text", "")
                 chat_id = message.get("chat", {}).get("id")
                 user_id = message.get("from", {}).get("id")
                 username = message.get("from", {}).get("username")
                 first_name = message.get("from", {}).get("first_name")
 
-                if not text or not chat_id:
+                if not chat_id:
+                    continue
+
+                # Ovozli xabar
+                voice = message.get("voice") or message.get("audio")
+                if voice:
+                    send_typing(chat_id)
+                    send_message(chat_id, "🎤 Ovozingizni tinglayapman...")
+                    file_id = voice.get("file_id")
+                    audio_data = download_voice(file_id)
+                    if audio_data:
+                        text = transcribe_voice(audio_data)
+                        if text:
+                            send_message(chat_id, f"Siz dedingiz: {text}")
+                            update_analytics(user_id, text)
+                            reply = get_ai_reply(chat_id, text)
+                            send_message(chat_id, reply)
+                            send_to_crm(user_id, username, first_name, f"[OVOZ] {text}", reply)
+                        else:
+                            send_message(chat_id, "Ovozni tushunib bolmadi. Iltimos yozib yuboring.")
+                    else:
+                        send_message(chat_id, "Ovozni qayta ishlashda xatolik. Iltimos yozib yuboring.")
+                    continue
+
+                text = message.get("text", "")
+                if not text:
                     continue
 
                 if text.startswith("/"):
@@ -700,13 +682,13 @@ def main():
                         send_typing(chat_id)
                         top_topics = sorted(analytics["topics"].items(), key=lambda x: x[1], reverse=True)[:3]
                         top_hours = sorted(analytics["hourly"].items(), key=lambda x: x[1], reverse=True)[:3]
-                        topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)]) or "  Ma'lumot yo'q"
-                        hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours]) or "  Ma'lumot yo'q"
+                        topics_text = "\n".join([f"  {i+1}. {t}: {c} ta" for i, (t, c) in enumerate(top_topics)]) or "  Malumot yoq"
+                        hours_text = "\n".join([f"  {h}:00 - {c} xabar" for h, c in top_hours]) or "  Malumot yoq"
                         stats = (
                             f"📊 Bugungi statistika\n\n"
                             f"👥 Foydalanuvchilar: {len(analytics['unique_users'])} ta\n"
                             f"💬 Jami xabarlar: {analytics['total_messages']} ta\n\n"
-                            f"🔥 Ko'p so'ralgan:\n{topics_text}\n\n"
+                            f"🔥 Kop soralgan:\n{topics_text}\n\n"
                             f"⏰ Eng faol vaqt:\n{hours_text}"
                         )
                         send_message(chat_id, stats)
@@ -723,10 +705,8 @@ def main():
                 send_to_crm(user_id, username, first_name, text, reply)
 
         except Exception as e:
-            print(f"⚠️ Xato: {e}")
-            print("5 soniya kutilmoqda...")
+            print(f"Xato: {e}")
             time.sleep(5)
-            print("Qayta urinilmoqda...")
 
 if __name__ == "__main__":
     main()
